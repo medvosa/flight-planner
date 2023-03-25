@@ -3,12 +3,13 @@ import './App.css';
 
 import { MapContainer, Marker, Popup, TileLayer, Polyline } from 'react-leaflet';
 import { useMapEvents } from 'react-leaflet';
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import 'leaflet-polylinedecorator';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -181,6 +182,40 @@ function downloadJSONFile(object, filename = "data.json") {
   }, 0);
 }
 
+
+const PolylineWithArrows = ({ positions }) => {
+  const map = useMapEvents({});
+
+  useEffect(() => {
+
+    const polyline = L.polyline(positions).addTo(map);
+
+      const arrowHead = L.Symbol.arrowHead({
+        pixelSize: 10,
+        polygon: false,
+        pathOptions: { stroke: true, color: '#f00' },
+      });
+
+      const patterns = positions.map((_, index) => ({
+        offset: `${((index + 1) / positions.length) * 100}%`,
+        repeat: 0,
+        symbol: arrowHead,
+      }));
+
+      const decorator = L.polylineDecorator(polyline, {
+        patterns,
+      }).addTo(map);
+
+      return () => {
+        map.removeLayer(polyline);
+        map.removeLayer(decorator);
+      };
+    
+  }, [map, positions]);
+
+  return null;
+};
+
 function App() {
   const [isSatelite, setIsSatelite] = useState(false)
   const [path, setPath] = useState([]);
@@ -226,6 +261,10 @@ function App() {
   function load() {
     readJSONFileFromUser(setPath)
   }
+
+
+  const mapRef = useRef();
+
   return (
     <div className="App bg-neutral-200 flex flex-col min-h-screen">
       <div className='p-1'>
@@ -291,7 +330,7 @@ function App() {
         </div>
       </div>
       <div className='flex flex-col flex-1'>
-        <MapContainer className='flex-1' center={[location?.lat, location?.lng]} zoom={zoom} whenReady={(v) => console.log('zoomer', v)} >
+        <MapContainer className='flex-1' center={[location?.lat, location?.lng]} zoom={zoom} whenReady={(v) => console.log('zoomer', v)} ref={mapRef} >
           <TileLayer
             url={"/images/m_file_{z}_{x}_{y}" + (isSatelite ? "_sat" : "") + ".png"}
             // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -302,6 +341,7 @@ function App() {
 
           <Clicker onClick={addPoint} onZoom={setZoom} onMove={setLocation} />
           <Markers path={path} setPath={setPath} />
+          <PolylineWithArrows positions={path} />
           {/* {markes} */}
         </MapContainer>
       </div>
