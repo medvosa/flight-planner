@@ -27,12 +27,12 @@
 
 
 
-$xa = 9
-$ya = 4
-$xb = 10
-$yb = 5
+$xa = 38100
+$ya = 76568
+$xb = 38108
+$yb = 76575
     
-for ($size = 4; $size -lt 17; $size++ ){
+for ($size = 17; $size -lt 18; $size++ ){
     Write-Host "s"
     for($i = $xa; $i -le $xb; $i++) {
              Write-Host " i"
@@ -42,6 +42,7 @@ for ($size = 4; $size -lt 17; $size++ ){
                  # Rest of the code goes here
                  Write-Host "https://b.tile.openstreetmap.org/$size/$i/$j.png"
                  Invoke-WebRequest -UseBasicParsing -Uri "https://b.tile.openstreetmap.org/$size/$i/$j.png" -OutFile ("m_file_"+$size+"_"+$i+"_"+$j+".png")
+                 Invoke-WebRequest -UseBasicParsing -Uri "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/$size/$j/$i" -OutFile ("m_file_"+$size+"_"+$i+"_"+$j+"_sat.png")
              }
          }
          $xa = $xa * 2

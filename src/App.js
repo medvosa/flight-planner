@@ -1,10 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 
-import { MapContainer, Marker, Popup, TileLayer, Polyline } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer, Polyline, Tooltip, GeoJSON } from 'react-leaflet';
 import { useMapEvents } from 'react-leaflet';
 import { useState, useRef, useEffect } from 'react'
 
+
+import { Map as LeafletMap } from 'leaflet';
 
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -19,6 +21,66 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+class NoWheelZoomAnimationMap extends LeafletMap {
+  get wheelPxPerZoomLevel() {
+    return 1000;
+  }
+}
+
+const useCustomZoom = (allowedZoomLevels) => {
+  const mapRef = useRef();
+
+  const map = useMapEvents({
+    zoomstart: () => {
+      mapRef.current = map.getZoom();
+    },
+    zoomend: () => {
+      const currentZoom = map.getZoom();
+      const prevZoom = mapRef.current;
+      const zoomingIn = currentZoom > prevZoom;
+
+      if (!allowedZoomLevels.includes(currentZoom)) {
+        let targetZoom;
+        console.log(`${currentZoom} not allowed`)
+
+        if (zoomingIn) {
+          console.log('azl',allowedZoomLevels)
+          if(allowedZoomLevels.filter((z) => z > currentZoom).length==0){
+            map.setZoom(Math.max(...allowedZoomLevels), {animate:false});
+            return;
+          }
+          targetZoom = Math.min(...allowedZoomLevels.filter((z) => z > currentZoom));
+          console.log('target', targetZoom)
+          if (allowedZoomLevels.length==0) {//isNaN(targetZoom)) {
+            console.log('inside')
+            targetZoom = Math.max(...allowedZoomLevels);
+          }
+        } else {
+          console.log('azl',allowedZoomLevels)
+          if(allowedZoomLevels.filter((z) => z < currentZoom).length==0){
+            map.setZoom(Math.min(...allowedZoomLevels), {animate:false});
+            return;
+          }
+          targetZoom = Math.max(...allowedZoomLevels.filter((z) => z < currentZoom));
+          console.log('target', targetZoom)
+          if (allowedZoomLevels.length==0) {//isNaN(targetZoom)) {
+            console.log('inside')
+            targetZoom = Math.min(...allowedZoomLevels);
+          }
+          // targetZoom = Math.max(...allowedZoomLevels.filter((z) => z < currentZoom));
+          // if (isNaN(targetZoom)) {
+          //   targetZoom = Math.min(...allowedZoomLevels);
+          // }
+        }
+        console.log('setTo', targetZoom)
+
+        map.setZoom(targetZoom, { animate: false });
+      }
+    },
+  });
+
+  return null;
+};
 
 function Clicker({ onClick, onZoom, onMove }) {
 
@@ -28,16 +90,26 @@ function Clicker({ onClick, onZoom, onMove }) {
       onClick([lat, lng]);
     }
   }
+
+  useCustomZoom([13,16,17])
+
   const map = useMapEvents({
     click: handleClick,
     zoomlevelschange: () => console.log('aaa'),
     move: (v) => {
       onMove(map.getCenter())
-      console.log('move', map.getCenter())
+      // console.log('move', map.getCenter())
     },
-    zoom: (v) => {
-      console.log('zoom', v.target._zoom)
+    zoomstart(){
+
+    },
+    zoomend: (v) => {
+      // console.log('zoom', v.target._zoom)
       onZoom(v.target._zoom)
+      // if(v.target._zoom==18)
+      //   map.setZoom(17)
+      // if(v.target._zoom==15)
+      //   map.setZoom(16)
     },
     // zoomLevelChange:console.log,
     drag: console.log
@@ -147,6 +219,10 @@ const PathMarker = ({ position, index, path, setPath }) => {
           </div>
         </div>
       </Popup>
+      
+      <Tooltip direction="left" offset={[0, -10]} opacity={1} permanent>
+        #{index+1}, {position[2]}м
+      </Tooltip>
     </Marker>
   );
 };
@@ -217,11 +293,34 @@ const PolylineWithArrows = ({ positions }) => {
 };
 
 function App() {
-  const [isSatelite, setIsSatelite] = useState(false)
+  const [mapMode, setMapMode] = useState(0)
   const [path, setPath] = useState([]);
   const addPoint = (point) => {
     setPath(v => [...v, [...point,100]])
   };
+  
+  const [geoJson, setGeoJson] = useState(null)
+
+  useEffect(()=>{
+    fetch('export.geojson').then(res=>res.json()).then(setGeoJson)
+  },[])
+
+  const onEachFeature = (feature, layer) => {
+    if (feature.properties && feature.properties.name) {
+      console.log(feature)
+      layer.bindTooltip(feature.properties.name, { permanent: true, direction: 'center' });
+      console.log('layer:',layer)
+      // layer.setText(feature.properties.name, {
+      //   repeat: true,
+      //   center: true,
+      //   attributes: { dy: '5' },
+      // });
+    }
+
+    
+  };
+
+
   const dump = () => {
     downloadJSONFile(path)
   }
@@ -265,6 +364,12 @@ function App() {
 
   const mapRef = useRef();
 
+  useEffect(()=>{
+    if(zoom == 18){
+      setZoom(17)
+    }
+  },[zoom])
+
   return (
     <div className="App bg-neutral-200 flex flex-col min-h-screen">
       <div className='p-1'>
@@ -303,12 +408,30 @@ function App() {
           </div>
 
           <div className='flex flex-col gap-1 ml-auto items-end'>
-            <div>
-              <button onClick={() => setIsSatelite(v => !v)} className="bg-blue-500 hover:bg-blue-700 text-white text-sm py-1 px-2 rounded flex gap-2" >
+            <div className='flex'>
+              <button onClick={() => setMapMode(0)} className={"flex items-center hover:bg-blue-700 text-white text-sm py-1 px-2 rounded-l flex gap-2 "+(!mapMode?'bg-blue-500':'bg-neutral-200 text-neutral-700 hover:text-white')} >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M14.65 4.97999L9.65 3.22999C9.23 3.07999 8.77 3.07999 8.35 3.21999L4.36 4.55999C3.55 4.83999 3 5.59999 3 6.45999V18.31C3 19.72 4.41 20.68 5.72 20.17L8.65 19.03C8.87 18.94 9.12 18.94 9.34 19.02L14.34 20.77C14.76 20.92 15.22 20.92 15.64 20.78L19.63 19.44C20.44 19.17 20.99 18.4 20.99 17.54V5.68999C20.99 4.27999 19.58 3.31999 18.27 3.82999L15.34 4.96999C15.12 5.04999 14.88 5.05999 14.65 4.97999ZM15 18.89L9 16.78V5.10999L15 7.21999V18.89Z" fill="white" fill-opacity="0.9" />
                 </svg>
-                переключить режим
+                <div>
+                  Карта
+                </div>
+              </button>
+              <button onClick={() => setMapMode(1)} className={"hover:bg-blue-700 text-white text-sm py-1 px-2 flex gap-2 items-center "+(mapMode==1?'bg-blue-500':'bg-neutral-200 text-neutral-700 hover:text-white')} >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.65 4.97999L9.65 3.22999C9.23 3.07999 8.77 3.07999 8.35 3.21999L4.36 4.55999C3.55 4.83999 3 5.59999 3 6.45999V18.31C3 19.72 4.41 20.68 5.72 20.17L8.65 19.03C8.87 18.94 9.12 18.94 9.34 19.02L14.34 20.77C14.76 20.92 15.22 20.92 15.64 20.78L19.63 19.44C20.44 19.17 20.99 18.4 20.99 17.54V5.68999C20.99 4.27999 19.58 3.31999 18.27 3.82999L15.34 4.96999C15.12 5.04999 14.88 5.05999 14.65 4.97999ZM15 18.89L9 16.78V5.10999L15 7.21999V18.89Z" fill="white" fill-opacity="0.9" />
+                </svg>
+                <div>
+                  Спутник
+                </div>
+              </button>
+              <button onClick={() => setMapMode(2)} className={"hover:bg-blue-700 text-white text-sm py-1 px-2 rounded-r flex gap-2 items-center "+(mapMode==2?'bg-blue-500':'bg-neutral-200 text-neutral-700 hover:text-white')} >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.65 4.97999L9.65 3.22999C9.23 3.07999 8.77 3.07999 8.35 3.21999L4.36 4.55999C3.55 4.83999 3 5.59999 3 6.45999V18.31C3 19.72 4.41 20.68 5.72 20.17L8.65 19.03C8.87 18.94 9.12 18.94 9.34 19.02L14.34 20.77C14.76 20.92 15.22 20.92 15.64 20.78L19.63 19.44C20.44 19.17 20.99 18.4 20.99 17.54V5.68999C20.99 4.27999 19.58 3.31999 18.27 3.82999L15.34 4.96999C15.12 5.04999 14.88 5.05999 14.65 4.97999ZM15 18.89L9 16.78V5.10999L15 7.21999V18.89Z" fill="white" fill-opacity="0.9" />
+                </svg>
+                <div>
+                  Гибрид
+                </div>
               </button>
             </div>
             <div className='flex'>
@@ -330,15 +453,49 @@ function App() {
         </div>
       </div>
       <div className='flex flex-col flex-1'>
-        <MapContainer className='flex-1' center={[location?.lat, location?.lng]} zoom={zoom} whenReady={(v) => console.log('zoomer', v)} ref={mapRef} >
+        <MapContainer 
+          className='flex-1' 
+          center={[location?.lat, location?.lng]} 
+          zoom={zoom} 
+          whenReady={(v) => console.log('zoomer', v)} 
+          ref={mapRef}
+          whenCreated={(map) => {
+            map.__proto__ = NoWheelZoomAnimationMap.prototype;
+          }} 
+        >
+          {/* working */}
           <TileLayer
-            url={"./images/m_file_{z}_{x}_{y}" + (isSatelite ? "_sat" : "") + ".png"}
+            url={"./images/m_file_{z}_{x}_{y}" + (mapMode==1 ? "_sat" : "") + ".png"}
             // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
           />
+          
+          {mapMode == 2 && <TileLayer
+            url={"./images/m_file_{z}_{x}_{y}" + ("_sat.png")}
+            style={{opacity:.13}}
+            opacity={0.4}
+            // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+          />}
+
+
+          
+          {/* <TileLayer
+            url={"./images/m_file_{z}_{x}_{y}" + (mapMode!=0 ? "_sat" : "") + ".png"}
+            // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+          />
+          
+          {mapMode == 2 && <TileLayer
+            url={"./images/m_file_{z}_{x}_{y}" + (".png")}
+            style={{opacity:.13}}
+            opacity={0.4}
+            // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+          />} */}
 
           <Polyline pathOptions={{ color: 'red' }} positions={path} />
-
+          {/* {geoJson && <GeoJSON data={geoJson} onEachFeature={onEachFeature} />} */}
           <Clicker onClick={addPoint} onZoom={setZoom} onMove={setLocation} />
           <Markers path={path} setPath={setPath} />
           <PolylineWithArrows positions={path} />

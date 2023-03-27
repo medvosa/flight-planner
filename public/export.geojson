@@ -1,0 +1,257 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-ide",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2023-03-27T19:53:39Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/264573674",
+        "foot": "no",
+        "highway": "tertiary",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "RU:urban",
+        "name": "Подъездной переулок",
+        "postal_code": "190013",
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.3297896,
+            59.9210323
+          ],
+          [
+            30.3298915,
+            59.9209706
+          ],
+          [
+            30.329945,
+            59.920936
+          ],
+          [
+            30.3304329,
+            59.9206277
+          ],
+          [
+            30.331264,
+            59.9201109
+          ]
+        ]
+      },
+      "id": "way/264573674"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/308301794",
+        "foot": "no",
+        "highway": "primary",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "RU:urban",
+        "name": "Загородный проспект",
+        "name:etymology:wikidata": "Q1107656",
+        "name:ru": "Загородный проспект",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "trolley_wire": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.3270338,
+            59.9199608
+          ],
+          [
+            30.3272719,
+            59.92003
+          ],
+          [
+            30.3274319,
+            59.9200878
+          ],
+          [
+            30.3275862,
+            59.9201479
+          ],
+          [
+            30.3278692,
+            59.9202553
+          ],
+          [
+            30.3282163,
+            59.9203863
+          ],
+          [
+            30.328667,
+            59.9205594
+          ],
+          [
+            30.3289313,
+            59.9206637
+          ],
+          [
+            30.3297896,
+            59.9210323
+          ]
+        ]
+      },
+      "id": "way/308301794"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/321719689",
+        "foot": "no",
+        "highway": "primary",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "RU:urban",
+        "name": "Загородный проспект",
+        "name:etymology:wikidata": "Q1107656",
+        "name:ru": "Загородный проспект",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "trolley_wire": "yes",
+        "turn:lanes": "left|left;through|through;right"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.3305534,
+            59.9213401
+          ],
+          [
+            30.3316978,
+            59.9217975
+          ]
+        ]
+      },
+      "id": "way/321719689"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/410372607",
+        "foot": "no",
+        "highway": "primary",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "RU:urban",
+        "name": "Загородный проспект",
+        "name:etymology:wikidata": "Q1107656",
+        "name:ru": "Загородный проспект",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "trolley_wire": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.3303834,
+            59.9214354
+          ],
+          [
+            30.3298452,
+            59.921217
+          ],
+          [
+            30.3296352,
+            59.9211334
+          ],
+          [
+            30.3288702,
+            59.9208365
+          ],
+          [
+            30.3284751,
+            59.9206836
+          ],
+          [
+            30.3282423,
+            59.9205977
+          ]
+        ]
+      },
+      "id": "way/410372607"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/459816015",
+        "foot": "no",
+        "highway": "primary",
+        "lanes": "3",
+        "lit": "yes",
+        "maxspeed": "RU:urban",
+        "name": "Загородный проспект",
+        "name:etymology:wikidata": "Q1107656",
+        "name:ru": "Загородный проспект",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "trolley_wire": "yes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.3297896,
+            59.9210323
+          ],
+          [
+            30.330008,
+            59.9211215
+          ],
+          [
+            30.3305534,
+            59.9213401
+          ]
+        ]
+      },
+      "id": "way/459816015"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/734514931",
+        "highway": "unclassified",
+        "lit": "yes",
+        "name": "Винокурцевский проезд",
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.3295941,
+            59.9202646
+          ],
+          [
+            30.329265,
+            59.9204516
+          ],
+          [
+            30.3291324,
+            59.9205348
+          ],
+          [
+            30.329026,
+            59.9206022
+          ],
+          [
+            30.3289313,
+            59.9206637
+          ]
+        ]
+      },
+      "id": "way/734514931"
+    }
+  ]
+}
