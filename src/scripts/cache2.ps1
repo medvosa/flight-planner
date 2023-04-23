@@ -27,10 +27,10 @@
 
 
 
-$xa = 38100
-$ya = 76568
-$xb = 38108
-$yb = 76575
+$xa = 0
+$ya = 131071
+$xb = 0
+$yb = 131071
     
 for ($size = 17; $size -lt 18; $size++ ){
     Write-Host "s"

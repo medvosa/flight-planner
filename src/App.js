@@ -465,13 +465,15 @@ function App() {
         >
           {/* working */}
           <TileLayer
-            url={"./images/m_file_{z}_{x}_{y}" + (mapMode==1 ? "_sat" : "") + ".png"}
-            // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            // url={"./images/m_file_{z}_{x}_{y}" + (mapMode==1 ? "_sat" : "") + ".png"}
+            url={mapMode!=1?"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png":
+            
+            "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png" }
             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
           />
           
-          {mapMode == 2 && <TileLayer
-            url={"./images/m_file_{z}_{x}_{y}" + ("_sat.png")}
+          {mapMode != 0 && <TileLayer
+            url="https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png" 
             style={{opacity:.13}}
             opacity={0.4}
             // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
